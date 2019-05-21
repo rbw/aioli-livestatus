@@ -24,8 +24,10 @@ class LivestatusService(BaseService):
         return [dict(zip(header, row)) for row in body]
 
     async def _write(self, writer, command):
-        command = f"{command}\nOutputFormat: json\n"
-        writer.write(command.encode('utf-8'))
+        command.append("OutputFormat: json\n")
+        cmd_str = '\n'.join(command).encode('utf-8')
+
+        writer.write(cmd_str)
 
         if writer.can_write_eof():
             writer.write_eof()
@@ -50,13 +52,13 @@ class LivestatusService(BaseService):
         return self._format_response(columns, response)
 
     async def get_one(self, source, query_filter, fields=None):
-        query = f"GET {source}\n"
+        query = [f"GET {source}"]
 
         if query_filter:
-            query += f'Filter: {query_filter}\n'
+            query.append(f'Filter: {query_filter}')
 
         if isinstance(fields, list):
-            query += await serialize_columns(fields)
+            query.append(await serialize_columns(fields))
 
         response = await self.send(query, fields)
 
@@ -69,13 +71,13 @@ class LivestatusService(BaseService):
         return response[0]
 
     async def get_many(self, source, query_filter=None, fields=None):
-        query = f"GET {source}\n"
+        query = [f"GET {source}"]
 
         if query_filter:
-            query += f'Filter: {query_filter}\n'
+            query.append(f"Filter: {query_filter}")
 
         if isinstance(fields, list):
-            query += await serialize_columns(fields)
+            query.append(await serialize_columns(fields))
 
         return await self.send(query, fields)
 
