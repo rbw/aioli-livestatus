@@ -82,10 +82,6 @@ class LivestatusService(BaseService):
         return await self.send(query, fields)
 
     async def _handle_request(self, *args, **kwargs):
-        # @TODO - implement connection re-use / queuing ?
-        # @TODO - implement error handling :: result['failed'], ['total_count']
-        # @TODO - implement stream parser
-
         try:
             reader, writer = await self._get_connection()
         except OSError as e:
